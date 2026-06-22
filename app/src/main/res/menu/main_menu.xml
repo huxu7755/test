@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_filter_category"
+        android:title="按分类筛选"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_filter_priority"
+        android:title="按优先级筛选"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete_completed"
+        android:title="删除已完成任务"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_stats"
+        android:title="统计数据"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_export"
+        android:title="导出数据 (JSON)"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_import"
+        android:title="导入数据 (JSON)"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sync_config"
+        android:title="多端同步设置"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sync_now"
+        android:title="立即同步"
+        app:showAsAction="never" />
+
+</menu>
