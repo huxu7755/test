@@ -15,6 +15,12 @@ class TaskAdapter(
     private val onEdit: (Task) -> Unit
 ) : ListAdapter<Task, TaskAdapter.ViewHolder>(DiffCallback()) {
 
+    var subtaskCountMap: Map<Long, Int> = emptyMap()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
@@ -37,6 +43,15 @@ class TaskAdapter(
                 else -> "🟢 低"
             }
             binding.tvPriority.text = priorityText
+
+            // Subtask count
+            val count = subtaskCountMap[task.id] ?: 0
+            if (count > 0) {
+                binding.tvSubTaskCount.text = "子任务: $count"
+                binding.tvSubTaskCount.visibility = android.view.View.VISIBLE
+            } else {
+                binding.tvSubTaskCount.visibility = android.view.View.GONE
+            }
 
             // Category
             binding.tvCategory.text = task.category
