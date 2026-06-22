@@ -30,31 +30,54 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _filterMode = MutableLiveData(FilterMode.ALL)
     val filterMode: LiveData<FilterMode> = _filterMode
 
+    private val _sortMode = MutableLiveData(SortMode.PRIORITY)
+    val sortMode: LiveData<SortMode> = _sortMode
+
     private val _filterCategory = MutableLiveData<String?>(null)
     val filterCategory: LiveData<String?> = _filterCategory
 
     private val _filterPriority = MutableLiveData<Int?>(null)
     val filterPriority: LiveData<Int?> = _filterPriority
 
-    val filteredTasks: LiveData<List<Task>> = _filterMode.switchMap { mode ->
-        when (mode) {
-            FilterMode.ALL -> activeTasks
-            FilterMode.CATEGORY -> _filterCategory.switchMap { cat ->
-                if (cat != null) taskDao.getTasksByCategory(cat)
-                else activeTasks
+    val filteredTasks: LiveData<List<Task>> = MediatorLiveData<List<Task>>().apply {
+        var currentTasks: List<Task> = emptyList()
+
+        addSource(_sortMode) { sort ->
+            value = sortTasks(currentTasks, sort)
+        }
+
+        addSource(_filterMode.switchMap { mode ->
+            when (mode) {
+                FilterMode.ALL -> activeTasks
+                FilterMode.CATEGORY -> _filterCategory.switchMap { cat ->
+                    if (cat != null) taskDao.getTasksByCategory(cat)
+                    else activeTasks
+                }
+                FilterMode.PRIORITY -> _filterPriority.switchMap { pri ->
+                    if (pri != null) taskDao.getTasksByPriority(pri)
+                    else activeTasks
+                }
+                FilterMode.OVERDUE -> taskDao.getOverdueTasks()
+                FilterMode.COMPLETED -> completedTasks
             }
-            FilterMode.PRIORITY -> _filterPriority.switchMap { pri ->
-                if (pri != null) taskDao.getTasksByPriority(pri)
-                else activeTasks
-            }
-            FilterMode.OVERDUE -> taskDao.getOverdueTasks()
-            FilterMode.COMPLETED -> completedTasks
+        }) { tasks ->
+            currentTasks = tasks ?: emptyList()
+            value = sortTasks(currentTasks, _sortMode.value ?: SortMode.PRIORITY)
         }
     }
 
     fun setFilterMode(mode: FilterMode) { _filterMode.value = mode }
+    fun setSortMode(mode: SortMode) { _sortMode.value = mode }
     fun setFilterCategory(category: String?) { _filterCategory.value = category }
     fun setFilterPriority(priority: Int?) { _filterPriority.value = priority }
+
+    private fun sortTasks(tasks: List<Task>, mode: SortMode): List<Task> {
+        return when (mode) {
+            SortMode.PRIORITY -> tasks.sortedByDescending { it.priority }
+            SortMode.CREATED_TIME -> tasks.sortedByDescending { it.createdAt }
+            SortMode.DEADLINE -> tasks.sortedByDescending { if (it.deadline > 0) it.deadline else Long.MIN_VALUE }
+        }
+    }
 
     fun insert(task: Task) = viewModelScope.launch { taskDao.insert(task) }
     fun update(task: Task) = viewModelScope.launch { taskDao.update(task) }
@@ -164,3 +187,5 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 }
 
 enum class FilterMode { ALL, CATEGORY, PRIORITY, OVERDUE, COMPLETED }
+
+enum class SortMode { PRIORITY, CREATED_TIME, DEADLINE }
