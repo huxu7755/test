@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.marvis.todoapp.databinding.ActivityMainBinding
 import com.marvis.todoapp.sync.DataExporter
 import com.marvis.todoapp.sync.SyncManager
+import com.marvis.todoapp.ui.AddEditTaskActivity
 import com.marvis.todoapp.ui.TaskDetailActivity
 import com.marvis.todoapp.ui.FilterMode
 import com.marvis.todoapp.ui.TaskAdapter
