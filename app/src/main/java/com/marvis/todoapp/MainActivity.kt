@@ -63,12 +63,31 @@ class MainActivity : AppCompatActivity() {
             adapter.submitList(tasks)
             binding.tvEmpty.visibility = if (tasks.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
             binding.tvTaskCount.text = "共 ${tasks.size} 项"
+            observeSubTaskCounts(tasks)
         }
 
         viewModel.filterMode.observe(this) { mode ->
             binding.chipAll.isChecked = mode == FilterMode.ALL
             binding.chipCompleted.isChecked = mode == FilterMode.COMPLETED
             binding.chipOverdue.isChecked = mode == FilterMode.OVERDUE
+        }
+    }
+
+    private fun observeSubTaskCounts(tasks: List<com.marvis.todoapp.data.Task>) {
+        val map = mutableMapOf<Long, Int>()
+        var pending = tasks.size
+        if (pending == 0) {
+            adapter.subtaskCountMap = map
+            return
+        }
+        for (task in tasks) {
+            viewModel.getSubTaskCount(task.id).observe(this) { count ->
+                map[task.id] = count
+                pending--
+                if (pending <= 0) {
+                    adapter.subtaskCountMap = map.toMap()
+                }
+            }
         }
     }
 
@@ -135,6 +154,16 @@ class MainActivity : AppCompatActivity() {
             else -> FilterMode.ALL
         }
         viewModel.setFilterMode(mode)
+    }
+
+    fun onSortChipClicked(view: android.view.View) {
+        val sortMode = when (view.id) {
+            R.id.chipSortPriority -> com.marvis.todoapp.ui.SortMode.PRIORITY
+            R.id.chipSortCreated -> com.marvis.todoapp.ui.SortMode.CREATED_TIME
+            R.id.chipSortDeadline -> com.marvis.todoapp.ui.SortMode.DEADLINE
+            else -> com.marvis.todoapp.ui.SortMode.PRIORITY
+        }
+        viewModel.setSortMode(sortMode)
     }
 
     private fun showCategoryFilter() {
