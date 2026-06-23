@@ -3,6 +3,8 @@ package com.marvis.todoapp.ui
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -22,7 +24,6 @@ class AddEditTaskActivity : AppCompatActivity() {
     private val viewModel: TaskViewModel by viewModels()
     private var taskId: Long = 0
     private var selectedDeadline: Long = 0L
-    private var selectedRepeatEnd: Long = 0L
     private var isEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +37,6 @@ class AddEditTaskActivity : AppCompatActivity() {
         setupCategorySpinner()
         setupDeadlinePicker()
         setupRepeatTypeSpinner()
-        setupRepeatEndPicker()
         setupSaveButton()
         setupDeleteButton()
 
@@ -102,28 +102,13 @@ class AddEditTaskActivity : AppCompatActivity() {
         val labels = RepeatType.entries.map { it.label }
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
         binding.spRepeatType.adapter = adapter
-    }
 
-    private fun setupRepeatEndPicker() {
-        binding.btnPickRepeatEnd.setOnClickListener {
-            val cal = Calendar.getInstance()
-            if (selectedRepeatEnd > 0) cal.timeInMillis = selectedRepeatEnd
-
-            DatePickerDialog(this, { _, year, month, day ->
-                cal.set(Calendar.YEAR, year)
-                cal.set(Calendar.MONTH, month)
-                cal.set(Calendar.DAY_OF_MONTH, day)
-                cal.set(Calendar.HOUR_OF_DAY, 23)
-                cal.set(Calendar.MINUTE, 59)
-                selectedRepeatEnd = cal.timeInMillis
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                binding.tvRepeatEndDisplay.text = "重复至: ${sdf.format(Date(selectedRepeatEnd))}"
-            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
-        }
-
-        binding.btnClearRepeatEnd.setOnClickListener {
-            selectedRepeatEnd = 0L
-            binding.tvRepeatEndDisplay.text = "无限重复"
+        binding.spRepeatType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                binding.tilRepeatInterval.visibility =
+                    if (position == RepeatType.CUSTOM.code) View.VISIBLE else View.GONE
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
@@ -144,6 +129,9 @@ class AddEditTaskActivity : AppCompatActivity() {
             else binding.spCategory.selectedItem?.toString() ?: "默认"
 
             val repeatType = binding.spRepeatType.selectedItemPosition
+            val repeatInterval = if (repeatType == RepeatType.CUSTOM.code) {
+                binding.etRepeatInterval.text.toString().toIntOrNull() ?: 1
+            } else 1
 
             val task = Task(
                 id = taskId,
@@ -153,7 +141,7 @@ class AddEditTaskActivity : AppCompatActivity() {
                 category = category,
                 deadline = selectedDeadline,
                 repeatType = repeatType,
-                repeatEndDate = selectedRepeatEnd
+                repeatInterval = repeatInterval
             )
 
             if (isEditMode) {
@@ -191,17 +179,16 @@ class AddEditTaskActivity : AppCompatActivity() {
                 binding.etDescription.setText(task.description)
                 binding.spPriority.setSelection(task.priority - 1)
                 selectedDeadline = task.deadline
-                selectedRepeatEnd = task.repeatEndDate
                 binding.spRepeatType.setSelection(task.repeatType)
+
+                if (task.repeatType == RepeatType.CUSTOM.code) {
+                    binding.etRepeatInterval.setText(task.repeatInterval.toString())
+                    binding.tilRepeatInterval.visibility = View.VISIBLE
+                }
 
                 if (task.deadline > 0) {
                     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                     binding.tvDeadlineDisplay.text = sdf.format(Date(task.deadline))
-                }
-
-                if (task.repeatEndDate > 0) {
-                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    binding.tvRepeatEndDisplay.text = "重复至: ${sdf.format(Date(task.repeatEndDate))}"
                 }
 
                 // Set category spinner
