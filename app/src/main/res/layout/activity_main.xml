@@ -54,60 +54,16 @@
                 android:text="已完成"
                 android:onClick="onFilterChipClicked" />
 
-        </com.google.android.material.chip.ChipGroup>
-
-        <!-- Sort chips -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="8dp"
-            android:paddingBottom="4dp"
-            android:gravity="center_vertical">
-
-            <TextView
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipCategory"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="排序:"
-                android:textSize="12sp"
-                android:textColor="?android:textColorSecondary"
-                android:layout_marginEnd="4dp" />
+                android:text="分类"
+                android:onClick="onCategoryChipClicked" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipSortGroup"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:singleSelection="true"
-                app:checkedChip="@id/chipSortPriority"
-                app:chipSpacingHorizontal="4dp">
+        </com.google.android.material.chip.ChipGroup>
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSortPriority"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="优先级"
-                    android:onClick="onSortChipClicked" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSortCreated"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="创建时间"
-                    android:onClick="onSortChipClicked" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSortDeadline"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="截止时间"
-                    android:onClick="onSortChipClicked" />
-
-            </com.google.android.material.chip.ChipGroup>
-        </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Task count -->
