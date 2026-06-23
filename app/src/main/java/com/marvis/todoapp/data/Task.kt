@@ -16,8 +16,8 @@ data class Task(
     val createdAt: Long = System.currentTimeMillis(),
     val completedAt: Long = 0,
     // 循环任务字段
-    val repeatType: Int = 0,     // 0=不重复 1=每天 2=每周 3=每月 4=每年
-    val repeatEndDate: Long = 0, // 重复截止日期，0=无限重复
+    val repeatType: Int = 0,     // 0=不重复 1=每天 2=每周 3=每月 4=每年 5=自定义
+    val repeatInterval: Int = 1, // 自定义重复间隔（天数），仅 repeatType=5 时有效
     val parentTaskId: Long = 0   // 父任务ID（自动生成的循环实例记录来源），0=原始任务
 )
 
@@ -26,7 +26,8 @@ enum class RepeatType(val code: Int, val label: String) {
     DAILY(1, "每天"),
     WEEKLY(2, "每周"),
     MONTHLY(3, "每月"),
-    YEARLY(4, "每年");
+    YEARLY(4, "每年"),
+    CUSTOM(5, "自定义");
 
     companion object {
         fun fromCode(code: Int) = entries.find { it.code == code } ?: NONE
