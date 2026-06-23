@@ -26,12 +26,21 @@
         android:textColor="?android:textColorPrimary" />
 
     <TextView
+        android:id="@+id/tvCreatedTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="11sp"
+        android:textColor="?android:textColorSecondary"
+        android:layout_marginEnd="6dp" />
+
+    <TextView
         android:id="@+id/tvCompletedTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="06-15 14:30"
+        android:text=""
         android:textSize="11sp"
-        android:textColor="?android:textColorSecondary"
+        android:textColor="@color/primary"
         android:layout_marginEnd="6dp"
         android:visibility="gone" />
 
