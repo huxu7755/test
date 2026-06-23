@@ -27,7 +27,7 @@ object DataExporter {
                         put("created_at", t.createdAt)
                         put("completed_at", t.completedAt)
                         put("repeat_type", t.repeatType)
-                        put("repeat_end_date", t.repeatEndDate)
+                        put("repeat_interval", t.repeatInterval)
                         put("parent_task_id", t.parentTaskId)
                     })
                 }
@@ -79,7 +79,7 @@ object DataExporter {
                     createdAt = obj.optLong("created_at", System.currentTimeMillis()),
                     completedAt = obj.optLong("completed_at", 0),
                     repeatType = obj.optInt("repeat_type", 0),
-                    repeatEndDate = obj.optLong("repeat_end_date", 0),
+                    repeatInterval = obj.optInt("repeat_interval", 1),
                     parentTaskId = obj.optLong("parent_task_id", 0)
                 )
             }
