@@ -15,10 +15,11 @@ class TaskAdapter(
     private val onEdit: (Task) -> Unit
 ) : ListAdapter<Task, TaskAdapter.ViewHolder>(DiffCallback()) {
 
-    var subtaskCountMap: Map<Long, Int> = emptyMap()
+    // Map<taskId, completedCount to totalCount>
+    var subtaskProgressMap: Map<Long, Pair<Int, Int>> = emptyMap()
         set(value) {
             field = value
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -44,14 +45,19 @@ class TaskAdapter(
             }
             binding.tvPriority.text = priorityText
 
-            // Subtask count
-            val count = subtaskCountMap[task.id] ?: 0
-            if (count > 0) {
-                binding.tvSubTaskCount.text = "子任务: $count"
+            // Subtask progress (completed / total)
+            val progress = subtaskProgressMap[task.id]
+            if (progress != null && progress.second > 0) {
+                binding.tvSubTaskCount.text = "子任务 ${progress.first}/${progress.second}"
                 binding.tvSubTaskCount.visibility = android.view.View.VISIBLE
             } else {
                 binding.tvSubTaskCount.visibility = android.view.View.GONE
             }
+
+            // Created time
+            val dateSdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            binding.tvCreatedAt.text = "创建: ${dateSdf.format(Date(task.createdAt))}"
+            binding.tvCreatedAt.visibility = android.view.View.VISIBLE
 
             // Category
             binding.tvCategory.text = task.category
