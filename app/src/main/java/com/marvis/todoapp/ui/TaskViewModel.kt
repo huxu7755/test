@@ -101,9 +101,9 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 RepeatType.WEEKLY.code -> cal.add(Calendar.WEEK_OF_YEAR, 1)
                 RepeatType.MONTHLY.code -> cal.add(Calendar.MONTH, 1)
                 RepeatType.YEARLY.code -> cal.add(Calendar.YEAR, 1)
+                RepeatType.CUSTOM.code -> cal.add(Calendar.DAY_OF_MONTH, task.repeatInterval)
             }
-            val next = cal.timeInMillis
-            if (task.repeatEndDate > 0 && next > task.repeatEndDate) 0L else next
+            cal.timeInMillis
         } else 0L
 
         val nextTask = Task(
@@ -113,7 +113,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             category = task.category,
             deadline = nextDeadline,
             repeatType = task.repeatType,
-            repeatEndDate = task.repeatEndDate,
+            repeatInterval = task.repeatInterval,
             parentTaskId = task.id
         )
         taskDao.insert(nextTask)
@@ -163,7 +163,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 createdAt = obj.optLong("created_at", System.currentTimeMillis()),
                 completedAt = obj.optLong("completed_at", 0),
                 repeatType = obj.optInt("repeat_type", 0),
-                repeatEndDate = obj.optLong("repeat_end_date", 0),
+                repeatInterval = obj.optInt("repeat_interval", 1),
                 parentTaskId = obj.optLong("parent_task_id", 0)
             )
             if (existing != null) taskDao.update(task) else taskDao.insert(task)
