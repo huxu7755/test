@@ -18,6 +18,7 @@ import com.marvis.todoapp.sync.SyncManager
 import com.marvis.todoapp.ui.AddEditTaskActivity
 import com.marvis.todoapp.ui.TaskDetailActivity
 import com.marvis.todoapp.ui.FilterMode
+import com.marvis.todoapp.ui.SortMode
 import com.marvis.todoapp.ui.TaskAdapter
 import com.marvis.todoapp.ui.TaskViewModel
 import com.marvis.todoapp.ui.StatsActivity
@@ -63,30 +64,36 @@ class MainActivity : AppCompatActivity() {
             adapter.submitList(tasks)
             binding.tvEmpty.visibility = if (tasks.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
             binding.tvTaskCount.text = "共 ${tasks.size} 项"
-            observeSubTaskCounts(tasks)
+            observeSubTaskProgress(tasks)
         }
 
         viewModel.filterMode.observe(this) { mode ->
             binding.chipAll.isChecked = mode == FilterMode.ALL
             binding.chipCompleted.isChecked = mode == FilterMode.COMPLETED
             binding.chipOverdue.isChecked = mode == FilterMode.OVERDUE
+            binding.chipCategory.isChecked = mode == FilterMode.CATEGORY
         }
     }
 
-    private fun observeSubTaskCounts(tasks: List<com.marvis.todoapp.data.Task>) {
-        val map = mutableMapOf<Long, Int>()
-        var pending = tasks.size
-        if (pending == 0) {
-            adapter.subtaskCountMap = map
+    private fun observeSubTaskProgress(tasks: List<com.marvis.todoapp.data.Task>) {
+        if (tasks.isEmpty()) {
+            adapter.subtaskProgressMap = emptyMap()
             return
         }
+        val map = mutableMapOf<Long, Pair<Int, Int>>()
+        var pending = tasks.size * 2 // 2 observers per task
         for (task in tasks) {
-            viewModel.getSubTaskCount(task.id).observe(this) { count ->
-                map[task.id] = count
+            viewModel.getSubTaskCount(task.id).observe(this) { total ->
+                val current = map[task.id] ?: Pair(0, 0)
+                map[task.id] = current.copy(second = total)
                 pending--
-                if (pending <= 0) {
-                    adapter.subtaskCountMap = map.toMap()
-                }
+                if (pending <= 0) adapter.subtaskProgressMap = map.toMap()
+            }
+            viewModel.getCompletedSubTaskCount(task.id).observe(this) { completed ->
+                val current = map[task.id] ?: Pair(0, 0)
+                map[task.id] = current.copy(first = completed)
+                pending--
+                if (pending <= 0) adapter.subtaskProgressMap = map.toMap()
             }
         }
     }
@@ -105,6 +112,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(com.marvis.todoapp.R.menu.main_menu, menu)
+        // Sync checked state for sort submenu
+        val sortMode = viewModel.sortMode.value ?: SortMode.PRIORITY
+        when (sortMode) {
+            SortMode.PRIORITY -> menu.findItem(com.marvis.todoapp.R.id.action_sort_priority).isChecked = true
+            SortMode.CREATED_TIME -> menu.findItem(com.marvis.todoapp.R.id.action_sort_created).isChecked = true
+            SortMode.DEADLINE -> menu.findItem(com.marvis.todoapp.R.id.action_sort_deadline).isChecked = true
+        }
         return true
     }
 
@@ -116,6 +130,21 @@ class MainActivity : AppCompatActivity() {
             }
             com.marvis.todoapp.R.id.action_filter_priority -> {
                 showPriorityFilter()
+                true
+            }
+            com.marvis.todoapp.R.id.action_sort_priority -> {
+                item.isChecked = true
+                viewModel.setSortMode(SortMode.PRIORITY)
+                true
+            }
+            com.marvis.todoapp.R.id.action_sort_created -> {
+                item.isChecked = true
+                viewModel.setSortMode(SortMode.CREATED_TIME)
+                true
+            }
+            com.marvis.todoapp.R.id.action_sort_deadline -> {
+                item.isChecked = true
+                viewModel.setSortMode(SortMode.DEADLINE)
                 true
             }
             com.marvis.todoapp.R.id.action_delete_completed -> {
@@ -151,19 +180,14 @@ class MainActivity : AppCompatActivity() {
             R.id.chipAll -> FilterMode.ALL
             R.id.chipOverdue -> FilterMode.OVERDUE
             R.id.chipCompleted -> FilterMode.COMPLETED
+            R.id.chipCategory -> FilterMode.CATEGORY
             else -> FilterMode.ALL
         }
         viewModel.setFilterMode(mode)
     }
 
-    fun onSortChipClicked(view: android.view.View) {
-        val sortMode = when (view.id) {
-            R.id.chipSortPriority -> com.marvis.todoapp.ui.SortMode.PRIORITY
-            R.id.chipSortCreated -> com.marvis.todoapp.ui.SortMode.CREATED_TIME
-            R.id.chipSortDeadline -> com.marvis.todoapp.ui.SortMode.DEADLINE
-            else -> com.marvis.todoapp.ui.SortMode.PRIORITY
-        }
-        viewModel.setSortMode(sortMode)
+    fun onCategoryChipClicked(view: android.view.View) {
+        showCategoryFilter()
     }
 
     private fun showCategoryFilter() {
@@ -289,7 +313,7 @@ class MainActivity : AppCompatActivity() {
                         put("created_at", task.createdAt)
                         put("completed_at", task.completedAt)
                         put("repeat_type", task.repeatType)
-                        put("repeat_end_date", task.repeatEndDate)
+                        put("repeat_interval", task.repeatInterval)
                         put("parent_task_id", task.parentTaskId)
                     }
                 }
