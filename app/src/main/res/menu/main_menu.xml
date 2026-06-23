@@ -13,6 +13,26 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_sort"
+        android:title="排序方式"
+        app:showAsAction="never">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_sort_priority"
+                    android:title="优先级"
+                    android:checked="true" />
+                <item
+                    android:id="@+id/action_sort_created"
+                    android:title="创建时间" />
+                <item
+                    android:id="@+id/action_sort_deadline"
+                    android:title="截止时间" />
+            </group>
+        </menu>
+    </item>
+
+    <item
         android:id="@+id/action_delete_completed"
         android:title="删除已完成任务"
         app:showAsAction="never" />
