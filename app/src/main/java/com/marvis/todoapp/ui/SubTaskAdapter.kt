@@ -29,12 +29,15 @@ class SubTaskAdapter(
             binding.cbDone.isChecked = subTask.isCompleted
             binding.tvContent.text = subTask.content
 
+            // Always show created time
+            val sdf = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
+            binding.tvCreatedTime.text = sdf.format(Date(subTask.createdAt))
+
             if (subTask.isCompleted) {
                 binding.tvContent.paintFlags = binding.tvContent.paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
                 binding.tvContent.alpha = 0.5f
                 if (subTask.completedAt > 0) {
-                    val sdf = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
-                    binding.tvCompletedTime.text = sdf.format(Date(subTask.completedAt))
+                    binding.tvCompletedTime.text = "完成: ${sdf.format(Date(subTask.completedAt))}"
                     binding.tvCompletedTime.visibility = android.view.View.VISIBLE
                 } else {
                     binding.tvCompletedTime.visibility = android.view.View.GONE
