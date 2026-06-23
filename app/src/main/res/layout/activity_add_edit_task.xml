@@ -159,48 +159,25 @@
             android:layout_height="48dp"
             android:background="@drawable/bg_spinner" />
 
-        <!-- Repeat End Date -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="重复截止日期（可选）"
-            android:textSize="14sp"
-            android:textColor="?android:textColorSecondary"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp" />
-
-        <LinearLayout
+        <!-- Custom repeat interval (visible when repeat type is CUSTOM) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRepeatInterval"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:hint="自定义周期（天）"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPickRepeatEnd"
-                android:layout_width="0dp"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRepeatInterval"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="选择结束日期"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
+                android:inputType="number"
+                android:maxLength="4"
+                android:text="1" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnClearRepeatEnd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="清除"
-                android:layout_marginStart="8dp"
-                style="@style/Widget.Material3.Button.TextButton" />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvRepeatEndDisplay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="无限重复"
-            android:textSize="13sp"
-            android:textColor="?android:textColorSecondary"
-            android:layout_marginTop="4dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Action buttons -->
         <LinearLayout
